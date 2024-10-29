@@ -172,25 +172,49 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
-tests/CMakeFiles/symmetric_tests.dir/rule:
-	cd /Users/theelusivegerbilfish/CPP_projects/cryptography_library/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/CMakeFiles/symmetric_tests.dir/rule
-.PHONY : tests/CMakeFiles/symmetric_tests.dir/rule
+tests/CMakeFiles/crypto_tests.dir/rule:
+	cd /Users/theelusivegerbilfish/CPP_projects/cryptography_library/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/CMakeFiles/crypto_tests.dir/rule
+.PHONY : tests/CMakeFiles/crypto_tests.dir/rule
 
 # Convenience name for target.
-symmetric_tests: tests/CMakeFiles/symmetric_tests.dir/rule
-.PHONY : symmetric_tests
+crypto_tests: tests/CMakeFiles/crypto_tests.dir/rule
+.PHONY : crypto_tests
 
 # fast build rule for target.
-symmetric_tests/fast:
-	cd /Users/theelusivegerbilfish/CPP_projects/cryptography_library/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/symmetric_tests.dir/build.make tests/CMakeFiles/symmetric_tests.dir/build
-.PHONY : symmetric_tests/fast
+crypto_tests/fast:
+	cd /Users/theelusivegerbilfish/CPP_projects/cryptography_library/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/crypto_tests.dir/build.make tests/CMakeFiles/crypto_tests.dir/build
+.PHONY : crypto_tests/fast
+
+hash_tests.o: hash_tests.cpp.o
+.PHONY : hash_tests.o
+
+# target to build an object file
+hash_tests.cpp.o:
+	cd /Users/theelusivegerbilfish/CPP_projects/cryptography_library/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/crypto_tests.dir/build.make tests/CMakeFiles/crypto_tests.dir/hash_tests.cpp.o
+.PHONY : hash_tests.cpp.o
+
+hash_tests.i: hash_tests.cpp.i
+.PHONY : hash_tests.i
+
+# target to preprocess a source file
+hash_tests.cpp.i:
+	cd /Users/theelusivegerbilfish/CPP_projects/cryptography_library/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/crypto_tests.dir/build.make tests/CMakeFiles/crypto_tests.dir/hash_tests.cpp.i
+.PHONY : hash_tests.cpp.i
+
+hash_tests.s: hash_tests.cpp.s
+.PHONY : hash_tests.s
+
+# target to generate assembly for a file
+hash_tests.cpp.s:
+	cd /Users/theelusivegerbilfish/CPP_projects/cryptography_library/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/crypto_tests.dir/build.make tests/CMakeFiles/crypto_tests.dir/hash_tests.cpp.s
+.PHONY : hash_tests.cpp.s
 
 symmetric_tests.o: symmetric_tests.cpp.o
 .PHONY : symmetric_tests.o
 
 # target to build an object file
 symmetric_tests.cpp.o:
-	cd /Users/theelusivegerbilfish/CPP_projects/cryptography_library/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/symmetric_tests.dir/build.make tests/CMakeFiles/symmetric_tests.dir/symmetric_tests.cpp.o
+	cd /Users/theelusivegerbilfish/CPP_projects/cryptography_library/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/crypto_tests.dir/build.make tests/CMakeFiles/crypto_tests.dir/symmetric_tests.cpp.o
 .PHONY : symmetric_tests.cpp.o
 
 symmetric_tests.i: symmetric_tests.cpp.i
@@ -198,7 +222,7 @@ symmetric_tests.i: symmetric_tests.cpp.i
 
 # target to preprocess a source file
 symmetric_tests.cpp.i:
-	cd /Users/theelusivegerbilfish/CPP_projects/cryptography_library/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/symmetric_tests.dir/build.make tests/CMakeFiles/symmetric_tests.dir/symmetric_tests.cpp.i
+	cd /Users/theelusivegerbilfish/CPP_projects/cryptography_library/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/crypto_tests.dir/build.make tests/CMakeFiles/crypto_tests.dir/symmetric_tests.cpp.i
 .PHONY : symmetric_tests.cpp.i
 
 symmetric_tests.s: symmetric_tests.cpp.s
@@ -206,7 +230,7 @@ symmetric_tests.s: symmetric_tests.cpp.s
 
 # target to generate assembly for a file
 symmetric_tests.cpp.s:
-	cd /Users/theelusivegerbilfish/CPP_projects/cryptography_library/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/symmetric_tests.dir/build.make tests/CMakeFiles/symmetric_tests.dir/symmetric_tests.cpp.s
+	cd /Users/theelusivegerbilfish/CPP_projects/cryptography_library/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/crypto_tests.dir/build.make tests/CMakeFiles/crypto_tests.dir/symmetric_tests.cpp.s
 .PHONY : symmetric_tests.cpp.s
 
 # Help Target
@@ -222,7 +246,10 @@ help:
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
 	@echo "... test"
-	@echo "... symmetric_tests"
+	@echo "... crypto_tests"
+	@echo "... hash_tests.o"
+	@echo "... hash_tests.i"
+	@echo "... hash_tests.s"
 	@echo "... symmetric_tests.o"
 	@echo "... symmetric_tests.i"
 	@echo "... symmetric_tests.s"

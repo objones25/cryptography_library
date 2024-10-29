@@ -237,17 +237,17 @@ gtest_main/fast:
 .PHONY : gtest_main/fast
 
 #=============================================================================
-# Target rules for targets named symmetric_tests
+# Target rules for targets named crypto_tests
 
 # Build rule for target.
-symmetric_tests: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 symmetric_tests
-.PHONY : symmetric_tests
+crypto_tests: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 crypto_tests
+.PHONY : crypto_tests
 
 # fast build rule for target.
-symmetric_tests/fast:
-	$(MAKE) $(MAKESILENT) -f tests/CMakeFiles/symmetric_tests.dir/build.make tests/CMakeFiles/symmetric_tests.dir/build
-.PHONY : symmetric_tests/fast
+crypto_tests/fast:
+	$(MAKE) $(MAKESILENT) -f tests/CMakeFiles/crypto_tests.dir/build.make tests/CMakeFiles/crypto_tests.dir/build
+.PHONY : crypto_tests/fast
 
 src/crypto_logger.o: src/crypto_logger.cpp.o
 .PHONY : src/crypto_logger.o
@@ -272,6 +272,30 @@ src/crypto_logger.s: src/crypto_logger.cpp.s
 src/crypto_logger.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/crypto.dir/build.make CMakeFiles/crypto.dir/src/crypto_logger.cpp.s
 .PHONY : src/crypto_logger.cpp.s
+
+src/hash.o: src/hash.cpp.o
+.PHONY : src/hash.o
+
+# target to build an object file
+src/hash.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/crypto.dir/build.make CMakeFiles/crypto.dir/src/hash.cpp.o
+.PHONY : src/hash.cpp.o
+
+src/hash.i: src/hash.cpp.i
+.PHONY : src/hash.i
+
+# target to preprocess a source file
+src/hash.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/crypto.dir/build.make CMakeFiles/crypto.dir/src/hash.cpp.i
+.PHONY : src/hash.cpp.i
+
+src/hash.s: src/hash.cpp.s
+.PHONY : src/hash.s
+
+# target to generate assembly for a file
+src/hash.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/crypto.dir/build.make CMakeFiles/crypto.dir/src/hash.cpp.s
+.PHONY : src/hash.cpp.s
 
 src/symmetric.o: src/symmetric.cpp.o
 .PHONY : src/symmetric.o
@@ -311,14 +335,17 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... test"
 	@echo "... crypto"
+	@echo "... crypto_tests"
 	@echo "... gmock"
 	@echo "... gmock_main"
 	@echo "... gtest"
 	@echo "... gtest_main"
-	@echo "... symmetric_tests"
 	@echo "... src/crypto_logger.o"
 	@echo "... src/crypto_logger.i"
 	@echo "... src/crypto_logger.s"
+	@echo "... src/hash.o"
+	@echo "... src/hash.i"
+	@echo "... src/hash.s"
 	@echo "... src/symmetric.o"
 	@echo "... src/symmetric.i"
 	@echo "... src/symmetric.s"

@@ -1,29 +1,29 @@
-# tests/CMakeLists.txt
 include(GoogleTest)
 
-# Add test executable
-add_executable(symmetric_tests
+# Add test executables
+add_executable(crypto_tests
     symmetric_tests.cpp
+    hash_tests.cpp
 )
 
-# Link against Google Test and our crypto library
-target_link_libraries(symmetric_tests
+# Link against our library, Google Test, and Threads
+target_link_libraries(crypto_tests
     PRIVATE
         crypto
         GTest::gtest
         GTest::gtest_main
+        Threads::Threads
 )
 
-# Add include directories from the crypto library
-get_target_property(CRYPTO_INCLUDES crypto INCLUDE_DIRECTORIES)
-target_include_directories(symmetric_tests
+# Add include directories
+target_include_directories(crypto_tests
     PRIVATE
-        ${CRYPTO_INCLUDES}
         ${PROJECT_SOURCE_DIR}/include
+        ${PROJECT_SOURCE_DIR}/src
 )
 
-# Enable testing
+# Enable testing with CTest
 enable_testing()
 
 # Discover tests
-gtest_discover_tests(symmetric_tests)
+gtest_discover_tests(crypto_tests)

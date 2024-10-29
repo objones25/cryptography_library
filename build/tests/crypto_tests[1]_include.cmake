@@ -1,0 +1,5 @@
+if(EXISTS "/Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/tests/crypto_tests[1]_tests.cmake")
+  include("/Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/tests/crypto_tests[1]_tests.cmake")
+else()
+  add_test(crypto_tests_NOT_BUILT crypto_tests_NOT_BUILT)
+endif()

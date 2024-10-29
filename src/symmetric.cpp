@@ -235,81 +235,67 @@ namespace crypto
         std::memcpy(state, temp, 16);
     }
 
-    std::vector<uint8_t> ModernSymmetricImpl::expandKey(const std::vector<uint8_t>& key) {
-    CryptoLogger::debug("Starting key expansion for " + 
-                       std::to_string(static_cast<int>(keyLength) * 8) + "-bit key");
-    
-    const size_t Nk = static_cast<size_t>(keyLength);
-    const size_t expandedKeySize = 4 * Nb * (nr + 1);
-    std::vector<uint8_t> expandedKey(expandedKeySize);
-    
-    // Copy initial key material
-    std::copy(key.begin(), key.end(), expandedKey.begin());
-    CryptoLogger::log_hex_array(key.data(), key.size(), "Initial key");
-    
-    // Expand the key
-    size_t i = Nk;
-    while (i < expandedKeySize / 4) {
-        std::array<uint8_t, 4> temp;
-        for (size_t j = 0; j < 4; j++) {
-            temp[j] = expandedKey[(i-1) * 4 + j];
-        }
-        
-        if (i % Nk == 0) {
-            // Perform key schedule core
-            // 1. Rotate word
-            uint8_t tmp = temp[0];
-            temp[0] = temp[1];
-            temp[1] = temp[2];
-            temp[2] = temp[3];
-            temp[3] = tmp;
-            
-            CryptoLogger::trace("After rotation: " +
-                std::to_string(static_cast<int>(temp[0])) + " " +
-                std::to_string(static_cast<int>(temp[1])) + " " +
-                std::to_string(static_cast<int>(temp[2])) + " " +
-                std::to_string(static_cast<int>(temp[3])));
-            
-            // 2. S-box substitution
-            for (size_t j = 0; j < 4; j++) {
-                temp[j] = SBOX[temp[j] >> 4][temp[j] & 0x0F];
+    std::vector<uint8_t> ModernSymmetricImpl::expandKey(const std::vector<uint8_t> &key)
+    {
+        const size_t Nk = static_cast<size_t>(keyLength);
+        const size_t expandedKeySize = 4 * Nb * (nr + 1);
+
+        // Pre-allocate expanded key buffer
+        std::vector<uint8_t> expandedKey(expandedKeySize);
+        std::memcpy(expandedKey.data(), key.data(), key.size());
+
+        // Temporary buffer for word operations
+        alignas(16) uint8_t temp[4];
+
+        // Expand the key with minimal logging
+        const bool isDebugEnabled = CryptoLogger::get_debug_mode();
+
+        size_t i = Nk;
+        while (i < expandedKeySize / 4)
+        {
+            std::memcpy(temp, &expandedKey[(i - 1) * 4], 4);
+
+            if (i % Nk == 0)
+            {
+                // Rotate word
+                uint8_t tempByte = temp[0];
+                temp[0] = temp[1];
+                temp[1] = temp[2];
+                temp[2] = temp[3];
+                temp[3] = tempByte;
+
+                // S-box substitution
+                for (size_t j = 0; j < 4; j++)
+                {
+                    temp[j] = SBOX[temp[j] >> 4][temp[j] & 0x0F];
+                }
+
+                temp[0] ^= RCON[i / Nk - 1];
             }
-            
-            // 3. XOR with round constant
-            temp[0] ^= RCON[i/Nk - 1];
-            
-            CryptoLogger::trace("After S-box and RCON: " +
-                std::to_string(static_cast<int>(temp[0])) + " " +
-                std::to_string(static_cast<int>(temp[1])) + " " +
-                std::to_string(static_cast<int>(temp[2])) + " " +
-                std::to_string(static_cast<int>(temp[3])));
-        }
-        else if (Nk > 6 && i % Nk == 4) {
-            // Additional S-box for AES-256
-            for (size_t j = 0; j < 4; j++) {
-                temp[j] = SBOX[temp[j] >> 4][temp[j] & 0x0F];
+            else if (Nk > 6 && i % Nk == 4)
+            {
+                // Additional S-box for AES-256
+                for (size_t j = 0; j < 4; j++)
+                {
+                    temp[j] = SBOX[temp[j] >> 4][temp[j] & 0x0F];
+                }
             }
+
+            // XOR with word Nk positions earlier
+            for (size_t j = 0; j < 4; j++)
+            {
+                expandedKey[i * 4 + j] = expandedKey[(i - Nk) * 4 + j] ^ temp[j];
+            }
+
+            i++;
         }
-        
-        // XOR with word Nk positions earlier
-        for (size_t j = 0; j < 4; j++) {
-            expandedKey[i * 4 + j] = expandedKey[(i - Nk) * 4 + j] ^ temp[j];
+
+        if (isDebugEnabled)
+        {
+            CryptoLogger::debug("Key expansion completed");
         }
-        
-        // Log the newly generated word
-        if (i % 4 == 3) {  // Log after completing each round key
-            size_t round = (i + 1) / 4 - 1;
-            CryptoLogger::log_round_key(expandedKey, round);
-        }
-        
-        i++;
+        return expandedKey;
     }
-    
-    CryptoLogger::debug("Key expansion completed - generated " + 
-                       std::to_string(expandedKeySize) + " bytes");
-    
-    return expandedKey;
-}
 
     void ModernSymmetricImpl::addRoundKey(uint8_t state[4][4],
                                           const std::vector<uint8_t> &roundKey,
@@ -326,16 +312,16 @@ namespace crypto
         }
     }
 
-    void ModernSymmetricImpl::encryptBlock(const uint8_t in[BlockSize],
-                                           uint8_t out[BlockSize],
-                                           const std::vector<uint8_t> &roundKeys)
+    void ModernSymmetricImpl::encryptBlock(
+        const uint8_t in[BlockSize],
+        uint8_t out[BlockSize],
+        const std::vector<uint8_t> &roundKeys)
     {
-        CryptoLogger::trace("Starting block encryption");
-        CryptoLogger::log_bytes(in, BlockSize, "Input block");
+        // Use aligned state array to ensure proper memory alignment
+        alignas(16) uint8_t state[4][4];
 
-        uint8_t state[4][4];
-
-        // Initialize state array from input (column-major format)
+        // Load input into state array directly in column-major format
+        // This eliminates one format conversion and reduces cache misses
         for (int i = 0; i < 4; i++)
         {
             for (int j = 0; j < 4; j++)
@@ -343,61 +329,131 @@ namespace crypto
                 state[j][i] = in[i * 4 + j];
             }
         }
-        CryptoLogger::log_state(state, "initial state array initialization");
 
-        CryptoLogger::trace("Initial AddRoundKey (round 0)");
-        addRoundKey(state, roundKeys, 0);
-        CryptoLogger::log_state(state, "initial AddRoundKey");
-
-        for (size_t round = 1; round < nr; ++round)
-        {
-            CryptoLogger::trace("Starting round " + std::to_string(round));
-
-            subBytes(state);
-            CryptoLogger::log_state(state, "SubBytes (round " + std::to_string(round) + ")");
-
-            shiftRows(state);
-            CryptoLogger::log_state(state, "ShiftRows (round " + std::to_string(round) + ")");
-
-            mixColumns(state);
-            CryptoLogger::log_state(state, "MixColumns (round " + std::to_string(round) + ")");
-
-            addRoundKey(state, roundKeys, round);
-            CryptoLogger::log_state(state, "AddRoundKey (round " + std::to_string(round) + ")");
-        }
-
-        CryptoLogger::trace("Final round (round " + std::to_string(nr) + ")");
-
-        subBytes(state);
-        CryptoLogger::log_state(state, "Final SubBytes");
-
-        shiftRows(state);
-        CryptoLogger::log_state(state, "Final ShiftRows");
-
-        addRoundKey(state, roundKeys, nr);
-        CryptoLogger::log_state(state, "Final AddRoundKey");
-
-        // Copy state array to output (column-major format)
+        // Initial round key addition
         for (int i = 0; i < 4; i++)
         {
             for (int j = 0; j < 4; j++)
             {
-                out[i * 4 + j] = state[j][i];
+                state[j][i] ^= roundKeys[i * 4 + j];
             }
         }
 
-        CryptoLogger::log_bytes(out, BlockSize, "Output block");
+        // Main rounds
+        for (size_t round = 1; round < nr; round++)
+        {
+            // SubBytes and ShiftRows combined for better cache utilization
+            // Store temporary values to avoid extra memory accesses
+            uint8_t temp;
+
+            // Row 0: No shift, only SubBytes
+            for (int i = 0; i < 4; i++)
+            {
+                state[0][i] = SBOX[state[0][i] >> 4][state[0][i] & 0x0F];
+            }
+
+            // Row 1: Shift left by 1
+            temp = state[1][0];
+            state[1][0] = SBOX[state[1][1] >> 4][state[1][1] & 0x0F];
+            state[1][1] = SBOX[state[1][2] >> 4][state[1][2] & 0x0F];
+            state[1][2] = SBOX[state[1][3] >> 4][state[1][3] & 0x0F];
+            state[1][3] = SBOX[temp >> 4][temp & 0x0F];
+
+            // Row 2: Shift left by 2
+            temp = state[2][0];
+            state[2][0] = SBOX[state[2][2] >> 4][state[2][2] & 0x0F];
+            state[2][2] = SBOX[temp >> 4][temp & 0x0F];
+            temp = state[2][1];
+            state[2][1] = SBOX[state[2][3] >> 4][state[2][3] & 0x0F];
+            state[2][3] = SBOX[temp >> 4][temp & 0x0F];
+
+            // Row 3: Shift left by 3 (right by 1)
+            temp = state[3][3];
+            state[3][3] = SBOX[state[3][2] >> 4][state[3][2] & 0x0F];
+            state[3][2] = SBOX[state[3][1] >> 4][state[3][1] & 0x0F];
+            state[3][1] = SBOX[state[3][0] >> 4][state[3][0] & 0x0F];
+            state[3][0] = SBOX[temp >> 4][temp & 0x0F];
+
+            // MixColumns
+            alignas(16) uint8_t temp_state[4][4];
+            for (int col = 0; col < 4; col++)
+            {
+                // Save original column values
+                uint8_t s0 = state[0][col];
+                uint8_t s1 = state[1][col];
+                uint8_t s2 = state[2][col];
+                uint8_t s3 = state[3][col];
+
+                temp_state[0][col] =
+                    xtime(s0) ^ xtime(s1) ^ s1 ^ s2 ^ s3;
+                temp_state[1][col] =
+                    s0 ^ xtime(s1) ^ xtime(s2) ^ s2 ^ s3;
+                temp_state[2][col] =
+                    s0 ^ s1 ^ xtime(s2) ^ xtime(s3) ^ s3;
+                temp_state[3][col] =
+                    xtime(s0) ^ s0 ^ s1 ^ s2 ^ xtime(s3);
+            }
+            std::memcpy(state, temp_state, 16);
+
+            // AddRoundKey with direct indexing
+            const uint8_t *roundKey = roundKeys.data() + (round * 16);
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    state[j][i] ^= roundKey[i * 4 + j];
+                }
+            }
+        }
+
+        // Final round (no MixColumns)
+        // Combined SubBytes, ShiftRows, and AddRoundKey
+        alignas(16) uint8_t final_state[4][4];
+        const uint8_t *finalKey = roundKeys.data() + (nr * 16);
+
+        // Row 0: No shift
+        for (int i = 0; i < 4; i++)
+        {
+            final_state[0][i] = SBOX[state[0][i] >> 4][state[0][i] & 0x0F] ^ finalKey[i * 4];
+        }
+
+        // Row 1: Shift left by 1
+        final_state[1][0] = SBOX[state[1][1] >> 4][state[1][1] & 0x0F] ^ finalKey[1];
+        final_state[1][1] = SBOX[state[1][2] >> 4][state[1][2] & 0x0F] ^ finalKey[5];
+        final_state[1][2] = SBOX[state[1][3] >> 4][state[1][3] & 0x0F] ^ finalKey[9];
+        final_state[1][3] = SBOX[state[1][0] >> 4][state[1][0] & 0x0F] ^ finalKey[13];
+
+        // Row 2: Shift left by 2
+        final_state[2][0] = SBOX[state[2][2] >> 4][state[2][2] & 0x0F] ^ finalKey[2];
+        final_state[2][1] = SBOX[state[2][3] >> 4][state[2][3] & 0x0F] ^ finalKey[6];
+        final_state[2][2] = SBOX[state[2][0] >> 4][state[2][0] & 0x0F] ^ finalKey[10];
+        final_state[2][3] = SBOX[state[2][1] >> 4][state[2][1] & 0x0F] ^ finalKey[14];
+
+        // Row 3: Shift right by 1
+        final_state[3][0] = SBOX[state[3][3] >> 4][state[3][3] & 0x0F] ^ finalKey[3];
+        final_state[3][1] = SBOX[state[3][0] >> 4][state[3][0] & 0x0F] ^ finalKey[7];
+        final_state[3][2] = SBOX[state[3][1] >> 4][state[3][1] & 0x0F] ^ finalKey[11];
+        final_state[3][3] = SBOX[state[3][2] >> 4][state[3][2] & 0x0F] ^ finalKey[15];
+
+        // Store result directly in column-major format
+        for (int i = 0; i < 4; i++)
+        {
+            for (int j = 0; j < 4; j++)
+            {
+                out[i * 4 + j] = final_state[j][i];
+            }
+        }
     }
 
-    void ModernSymmetricImpl::decryptBlock(const uint8_t in[BlockSize],
-                                           uint8_t out[BlockSize],
-                                           const std::vector<uint8_t> &roundKeys)
+    void ModernSymmetricImpl::decryptBlock(
+        const uint8_t in[BlockSize],
+        uint8_t out[BlockSize],
+        const std::vector<uint8_t> &roundKeys)
     {
-        CryptoLogger::trace("Starting block decryption");
+        // Use aligned state array
+        alignas(16) uint8_t state[4][4];
 
-        uint8_t state[4][4];
-
-        // Copy input to state array
+        // Load input into state array in column-major format
         for (int i = 0; i < 4; i++)
         {
             for (int j = 0; j < 4; j++)
@@ -407,101 +463,170 @@ namespace crypto
         }
 
         // Initial round
-        addRoundKey(state, roundKeys, nr);
-
-        // Main rounds
-        for (size_t round = nr - 1; round > 0; --round)
-        {
-            invShiftRows(state);
-            invSubBytes(state);
-            addRoundKey(state, roundKeys, round);
-            invMixColumns(state);
-        }
-
-        // Final round
-        invShiftRows(state);
-        invSubBytes(state);
-        addRoundKey(state, roundKeys, 0);
-
-        // Copy state array to output
+        const uint8_t *lastKey = roundKeys.data() + (nr * 16);
         for (int i = 0; i < 4; i++)
         {
             for (int j = 0; j < 4; j++)
             {
-                out[i * 4 + j] = state[j][i];
+                state[j][i] ^= lastKey[i * 4 + j];
+            }
+        }
+
+        // Combined InvShiftRows and InvSubBytes for better cache utilization
+        for (size_t round = nr - 1; round > 0; --round)
+        {
+            // First do InvShiftRows
+            uint8_t temp;
+
+            // Row 0: No shift (stays the same)
+
+            // Row 1: Shift right by 1
+            temp = state[1][3];
+            state[1][3] = state[1][2];
+            state[1][2] = state[1][1];
+            state[1][1] = state[1][0];
+            state[1][0] = temp;
+
+            // Row 2: Shift right by 2
+            std::swap(state[2][0], state[2][2]);
+            std::swap(state[2][1], state[2][3]);
+
+            // Row 3: Shift right by 3 (left by 1)
+            temp = state[3][0];
+            state[3][0] = state[3][1];
+            state[3][1] = state[3][2];
+            state[3][2] = state[3][3];
+            state[3][3] = temp;
+
+            // Then do InvSubBytes
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    state[i][j] = INV_SBOX[state[i][j] >> 4][state[i][j] & 0x0F];
+                }
+            }
+
+            // Then AddRoundKey
+            const uint8_t *roundKey = roundKeys.data() + (round * 16);
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    state[j][i] ^= roundKey[i * 4 + j];
+                }
+            }
+
+            // Finally InvMixColumns
+            alignas(16) uint8_t temp_state[4][4];
+            for (int col = 0; col < 4; col++)
+            {
+                for (int row = 0; row < 4; row++)
+                {
+                    uint8_t a = state[row][col];
+                    uint8_t b = xtime(a);
+                    uint8_t c = xtime(b);
+                    uint8_t d = xtime(c);
+
+                    temp_state[row][col] =
+                        (d ^ c ^ b) ^ // 0x0e * a
+                        (d ^ b ^ a) ^ // 0x0b * next
+                        (d ^ c ^ a) ^ // 0x0d * next
+                        (d ^ a);      // 0x09 * last
+                }
+            }
+            std::memcpy(state, temp_state, 16);
+        }
+        // Final round (no InvMixColumns)
+        // Combined InvShiftRows, InvSubBytes, and AddRoundKey
+        alignas(16) uint8_t final_state[4][4];
+
+        // Row 0: No shift
+        for (int i = 0; i < 4; i++)
+        {
+            final_state[0][i] = INV_SBOX[state[0][i] >> 4][state[0][i] & 0x0F] ^ roundKeys[0 + i * 4];
+        }
+
+        // Row 1: Shift right by 1
+        final_state[1][0] = INV_SBOX[state[1][3] >> 4][state[1][3] & 0x0F] ^ roundKeys[1];
+        final_state[1][1] = INV_SBOX[state[1][0] >> 4][state[1][0] & 0x0F] ^ roundKeys[5];
+        final_state[1][2] = INV_SBOX[state[1][1] >> 4][state[1][1] & 0x0F] ^ roundKeys[9];
+        final_state[1][3] = INV_SBOX[state[1][2] >> 4][state[1][2] & 0x0F] ^ roundKeys[13];
+
+        // Row 2: Shift right by 2
+        final_state[2][0] = INV_SBOX[state[2][2] >> 4][state[2][2] & 0x0F] ^ roundKeys[2];
+        final_state[2][1] = INV_SBOX[state[2][3] >> 4][state[2][3] & 0x0F] ^ roundKeys[6];
+        final_state[2][2] = INV_SBOX[state[2][0] >> 4][state[2][0] & 0x0F] ^ roundKeys[10];
+        final_state[2][3] = INV_SBOX[state[2][1] >> 4][state[2][1] & 0x0F] ^ roundKeys[14];
+
+        // Row 3: Shift left by 1
+        final_state[3][0] = INV_SBOX[state[3][1] >> 4][state[3][1] & 0x0F] ^ roundKeys[3];
+        final_state[3][1] = INV_SBOX[state[3][2] >> 4][state[3][2] & 0x0F] ^ roundKeys[7];
+        final_state[3][2] = INV_SBOX[state[3][3] >> 4][state[3][3] & 0x0F] ^ roundKeys[11];
+        final_state[3][3] = INV_SBOX[state[3][0] >> 4][state[3][0] & 0x0F] ^ roundKeys[15];
+
+        // Store result directly in column-major format
+        for (int i = 0; i < 4; i++)
+        {
+            for (int j = 0; j < 4; j++)
+            {
+                out[i * 4 + j] = final_state[j][i];
             }
         }
     }
 
     std::vector<uint8_t> ModernSymmetricImpl::addPKCS7Padding(const std::vector<uint8_t> &data)
     {
-        CryptoLogger::debug("Adding PKCS7 padding to data of size " +
-                            std::to_string(data.size()));
+        // Calculate padding length - if data length is multiple of block size,
+        // add a full block of padding
+        const size_t paddingLength =
+            data.size() % BlockSize == 0 ? BlockSize : BlockSize - (data.size() % BlockSize);
 
-        // Calculate padding length (1 to BlockSize bytes)
-        size_t paddingLength = BlockSize - (data.size() % BlockSize);
-        if (paddingLength == 0)
-        {
-            paddingLength = BlockSize;
-        }
+        // Pre-allocate the exact size needed
+        std::vector<uint8_t> paddedData;
+        paddedData.reserve(data.size() + paddingLength);
 
-        // Create padded data
-        std::vector<uint8_t> paddedData(data);
-        paddedData.resize(data.size() + paddingLength, static_cast<uint8_t>(paddingLength));
+        // Copy original data
+        paddedData.insert(paddedData.end(), data.begin(), data.end());
 
-        CryptoLogger::debug("Added " + std::to_string(paddingLength) +
-                            " bytes of padding. New size: " +
-                            std::to_string(paddedData.size()));
+        // Add padding bytes
+        const uint8_t paddingByte = static_cast<uint8_t>(paddingLength);
+        paddedData.insert(paddedData.end(), paddingLength, paddingByte);
+
         return paddedData;
     }
 
-    std::vector<uint8_t> ModernSymmetricImpl::removePKCS7Padding(const std::vector<uint8_t>& data) {
-    CryptoLogger::debug("Removing PKCS7 padding from data of size " + 
-                     std::to_string(data.size()));
-    
-    if (data.empty()) {
-        throw AESException("Cannot remove padding from empty data");
-    }
-    
-    validateBlockAlignment(data.size(), "Padded data");
-    
-    // Get the padding length from the last byte
-    uint8_t paddingLength = data.back();
-    
-    // Basic validation of padding length
-    if (paddingLength == 0 || paddingLength > BlockSize || paddingLength > data.size()) {
-        // For CBC error propagation testing, we should return the unpadded data
-        // if we're dealing with the last block and its padding is corrupted
-        if (data.size() == BlockSize || (data.size() % BlockSize == 0)) {
-            CryptoLogger::debug("Invalid padding detected during CBC error propagation - returning full block");
-            return data;
+    std::vector<uint8_t> ModernSymmetricImpl::removePKCS7Padding(const std::vector<uint8_t> &data)
+    {
+        if (data.empty())
+        {
+            throw AESException("Cannot remove padding from empty data");
         }
-        throw AESException("Invalid padding length: " + std::to_string(paddingLength));
-    }
-    
-    // Verify padding bytes
-    bool validPadding = true;
-    for (size_t i = data.size() - paddingLength; i < data.size(); i++) {
-        if (data[i] != paddingLength) {
-            validPadding = false;
-            break;
+
+        validateBlockAlignment(data.size(), "Padded data");
+
+        // Get padding length from last byte
+        const uint8_t paddingLength = data.back();
+
+        // Strict validation of padding length
+        if (paddingLength == 0 || paddingLength > BlockSize || paddingLength > data.size())
+        {
+            throw AESException("Invalid padding length: " + std::to_string(paddingLength));
         }
+
+        // Verify all padding bytes
+        const size_t messageLength = data.size() - paddingLength;
+        for (size_t i = messageLength; i < data.size(); i++)
+        {
+            if (data[i] != paddingLength)
+            {
+                throw AESException("Invalid padding bytes");
+            }
+        }
+
+        // Return data without padding
+        return std::vector<uint8_t>(data.begin(), data.begin() + messageLength);
     }
-    
-    if (!validPadding) {
-        // Same as above - during CBC error propagation we return the full data
-        CryptoLogger::debug("Invalid padding bytes detected during CBC error propagation");
-        return data;
-    }
-    
-    // If we get here, padding is valid and should be removed
-    std::vector<uint8_t> result(data.begin(), data.end() - paddingLength);
-    
-    CryptoLogger::debug("Removed " + std::to_string(paddingLength) + 
-                     " bytes of padding. New size: " + 
-                     std::to_string(result.size()));
-    return result;
-}
 
     void ModernSymmetricImpl::validatePadding(const std::vector<uint8_t> &paddedData)
     {
@@ -572,37 +697,42 @@ namespace crypto
                 throw InvalidBlockSize("Input data is empty");
             }
 
-            std::vector<uint8_t> paddedData = addPKCS7Padding(data);
-            CryptoLogger::debug("Starting CBC encryption with " +
-                                std::to_string(paddedData.size()) + " bytes of padded data");
-
-            std::vector<uint8_t> roundKeys = expandKey(key);
+            const std::vector<uint8_t> paddedData = addPKCS7Padding(data);
             std::vector<uint8_t> output(paddedData.size());
-            std::vector<uint8_t> previousBlock = iv;
+            const std::vector<uint8_t> roundKeys = expandKey(key);
+
+            // Stack-allocated buffers
+            alignas(16) uint8_t blockBuffer[BlockSize];
+            alignas(16) uint8_t prevBlock[BlockSize];
+            std::memcpy(prevBlock, iv.data(), BlockSize);
+
+            const size_t numBlocks = paddedData.size() / BlockSize;
+            const bool isDebugEnabled = CryptoLogger::get_debug_mode();
+            if (isDebugEnabled)
+            {
+                CryptoLogger::debug("Starting CBC encryption of " + std::to_string(numBlocks) + " blocks");
+            }
 
             for (size_t i = 0; i < paddedData.size(); i += BlockSize)
             {
-                // Create temporary block for XOR operation
-                std::vector<uint8_t> tempBlock(BlockSize);
+                // XOR with previous block
                 for (size_t j = 0; j < BlockSize; j++)
                 {
-                    tempBlock[j] = paddedData[i + j] ^ previousBlock[j];
+                    blockBuffer[j] = paddedData[i + j] ^ prevBlock[j];
                 }
 
-                // Encrypt the XORed block
-                encryptBlock(tempBlock.data(), output.data() + i, roundKeys);
+                // Encrypt block
+                encryptBlock(blockBuffer, output.data() + i, roundKeys);
 
-                // Update previous block for next iteration
-                previousBlock.assign(output.begin() + i, output.begin() + i + BlockSize);
+                // Update previous block
+                std::memcpy(prevBlock, output.data() + i, BlockSize);
             }
 
-            CryptoLogger::debug("CBC encryption completed successfully");
             return output;
         }
         catch (const std::exception &e)
         {
-            CryptoLogger::error("CBC encryption failed");
-            CryptoLogger::log_exception(e, "CBC encryption");
+            CryptoLogger::error("CBC encryption failed: " + std::string(e.what()));
             throw;
         }
     }
@@ -742,43 +872,38 @@ namespace crypto
             validateData(data);
             validateIV(iv);
 
-            CryptoLogger::debug("Starting CBC decryption of " +
-                                std::to_string(data.size()) + " bytes");
+            const std::vector<uint8_t> roundKeys = expandKey(key);
+            std::vector<uint8_t> output(data.size());
 
-            std::vector<uint8_t> roundKeys = expandKey(key);
-            std::vector<uint8_t> tempOutput(data.size());
-            std::vector<uint8_t> previousBlock = iv;
+            // Stack-allocated buffers
+            alignas(16) uint8_t decryptBuffer[BlockSize];
+            alignas(16) uint8_t prevBlock[BlockSize];
+            alignas(16) uint8_t currBlock[BlockSize];
+            std::memcpy(prevBlock, iv.data(), BlockSize);
 
-            // Decrypt all blocks
             for (size_t i = 0; i < data.size(); i += BlockSize)
             {
-                // Temporary storage for decrypted block
-                std::vector<uint8_t> decryptedBlock(BlockSize);
+                // Save current ciphertext block
+                std::memcpy(currBlock, data.data() + i, BlockSize);
 
-                // Decrypt the current block
-                decryptBlock(data.data() + i, decryptedBlock.data(), roundKeys);
+                // Decrypt block
+                decryptBlock(data.data() + i, decryptBuffer, roundKeys);
 
-                // XOR with previous ciphertext block (or IV for first block)
+                // XOR with previous block
                 for (size_t j = 0; j < BlockSize; j++)
                 {
-                    tempOutput[i + j] = decryptedBlock[j] ^ previousBlock[j];
+                    output[i + j] = decryptBuffer[j] ^ prevBlock[j];
                 }
 
-                // Update previous block for next iteration
-                previousBlock.assign(data.begin() + i, data.begin() + i + BlockSize);
+                // Update previous block
+                std::memcpy(prevBlock, currBlock, BlockSize);
             }
 
-            // Remove padding after all blocks are decrypted
-            auto unpaddedData = removePKCS7Padding(tempOutput);
-
-            CryptoLogger::debug("CBC decryption completed successfully, final size: " +
-                                std::to_string(unpaddedData.size()) + " bytes");
-            return unpaddedData;
+            return removePKCS7Padding(output);
         }
         catch (const std::exception &e)
         {
-            CryptoLogger::error("CBC decryption failed");
-            CryptoLogger::log_exception(e, "CBC decryption");
+            CryptoLogger::error("CBC decryption failed: " + std::string(e.what()));
             throw;
         }
     }
@@ -898,10 +1023,15 @@ namespace crypto
 
     void ModernSymmetricImpl::validateBlockAlignment(size_t size, const std::string &context)
     {
+        if (size == 0)
+        {
+            throw InvalidBlockSize(context + " is empty");
+        }
+
         if (size % BlockSize != 0)
         {
-            throw InvalidBlockSize(context + " size must be a multiple of " +
-                                   std::to_string(BlockSize) + " bytes");
+            throw InvalidBlockSize(context + " size (" + std::to_string(size) +
+                                   ") must be a multiple of " + std::to_string(BlockSize) + " bytes");
         }
     }
 

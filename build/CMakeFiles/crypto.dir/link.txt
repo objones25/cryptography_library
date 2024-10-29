@@ -1,2 +1,2 @@
-/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar qc libcrypto.a CMakeFiles/crypto.dir/src/symmetric.cpp.o CMakeFiles/crypto.dir/src/crypto_logger.cpp.o
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar qc libcrypto.a CMakeFiles/crypto.dir/src/symmetric.cpp.o CMakeFiles/crypto.dir/src/crypto_logger.cpp.o CMakeFiles/crypto.dir/src/hash.cpp.o
 /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ranlib libcrypto.a

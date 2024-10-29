@@ -134,7 +134,7 @@ _deps/googletest-build/googletest/clean: _deps/googletest-build/googletest/CMake
 # Directory level rules for directory tests
 
 # Recursive "all" directory target.
-tests/all: tests/CMakeFiles/symmetric_tests.dir/all
+tests/all: tests/CMakeFiles/crypto_tests.dir/all
 .PHONY : tests/all
 
 # Recursive "preinstall" directory target.
@@ -142,7 +142,7 @@ tests/preinstall:
 .PHONY : tests/preinstall
 
 # Recursive "clean" directory target.
-tests/clean: tests/CMakeFiles/symmetric_tests.dir/clean
+tests/clean: tests/CMakeFiles/crypto_tests.dir/clean
 .PHONY : tests/clean
 
 #=============================================================================
@@ -152,12 +152,12 @@ tests/clean: tests/CMakeFiles/symmetric_tests.dir/clean
 CMakeFiles/crypto.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/crypto.dir/build.make CMakeFiles/crypto.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/crypto.dir/build.make CMakeFiles/crypto.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/CMakeFiles --progress-num=1,2,3 "Built target crypto"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/CMakeFiles --progress-num=1,2,3,4 "Built target crypto"
 .PHONY : CMakeFiles/crypto.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/crypto.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/CMakeFiles 3
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/CMakeFiles 4
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/crypto.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/CMakeFiles 0
 .PHONY : CMakeFiles/crypto.dir/rule
@@ -178,7 +178,7 @@ CMakeFiles/crypto.dir/clean:
 _deps/googletest-build/googlemock/CMakeFiles/gmock.dir/all: _deps/googletest-build/googletest/CMakeFiles/gtest.dir/all
 	$(MAKE) $(MAKESILENT) -f _deps/googletest-build/googlemock/CMakeFiles/gmock.dir/build.make _deps/googletest-build/googlemock/CMakeFiles/gmock.dir/depend
 	$(MAKE) $(MAKESILENT) -f _deps/googletest-build/googlemock/CMakeFiles/gmock.dir/build.make _deps/googletest-build/googlemock/CMakeFiles/gmock.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/CMakeFiles --progress-num=4,5 "Built target gmock"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/CMakeFiles --progress-num=8,9 "Built target gmock"
 .PHONY : _deps/googletest-build/googlemock/CMakeFiles/gmock.dir/all
 
 # Build rule for subdir invocation for target.
@@ -201,11 +201,11 @@ _deps/googletest-build/googlemock/CMakeFiles/gmock.dir/clean:
 # Target rules for target _deps/googletest-build/googlemock/CMakeFiles/gmock_main.dir
 
 # All Build rule for target.
-_deps/googletest-build/googlemock/CMakeFiles/gmock_main.dir/all: _deps/googletest-build/googlemock/CMakeFiles/gmock.dir/all
 _deps/googletest-build/googlemock/CMakeFiles/gmock_main.dir/all: _deps/googletest-build/googletest/CMakeFiles/gtest.dir/all
+_deps/googletest-build/googlemock/CMakeFiles/gmock_main.dir/all: _deps/googletest-build/googlemock/CMakeFiles/gmock.dir/all
 	$(MAKE) $(MAKESILENT) -f _deps/googletest-build/googlemock/CMakeFiles/gmock_main.dir/build.make _deps/googletest-build/googlemock/CMakeFiles/gmock_main.dir/depend
 	$(MAKE) $(MAKESILENT) -f _deps/googletest-build/googlemock/CMakeFiles/gmock_main.dir/build.make _deps/googletest-build/googlemock/CMakeFiles/gmock_main.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/CMakeFiles --progress-num=6,7 "Built target gmock_main"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/CMakeFiles --progress-num=10,11 "Built target gmock_main"
 .PHONY : _deps/googletest-build/googlemock/CMakeFiles/gmock_main.dir/all
 
 # Build rule for subdir invocation for target.
@@ -231,7 +231,7 @@ _deps/googletest-build/googlemock/CMakeFiles/gmock_main.dir/clean:
 _deps/googletest-build/googletest/CMakeFiles/gtest.dir/all:
 	$(MAKE) $(MAKESILENT) -f _deps/googletest-build/googletest/CMakeFiles/gtest.dir/build.make _deps/googletest-build/googletest/CMakeFiles/gtest.dir/depend
 	$(MAKE) $(MAKESILENT) -f _deps/googletest-build/googletest/CMakeFiles/gtest.dir/build.make _deps/googletest-build/googletest/CMakeFiles/gtest.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/CMakeFiles --progress-num=8,9 "Built target gtest"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/CMakeFiles --progress-num=12,13 "Built target gtest"
 .PHONY : _deps/googletest-build/googletest/CMakeFiles/gtest.dir/all
 
 # Build rule for subdir invocation for target.
@@ -257,7 +257,7 @@ _deps/googletest-build/googletest/CMakeFiles/gtest.dir/clean:
 _deps/googletest-build/googletest/CMakeFiles/gtest_main.dir/all: _deps/googletest-build/googletest/CMakeFiles/gtest.dir/all
 	$(MAKE) $(MAKESILENT) -f _deps/googletest-build/googletest/CMakeFiles/gtest_main.dir/build.make _deps/googletest-build/googletest/CMakeFiles/gtest_main.dir/depend
 	$(MAKE) $(MAKESILENT) -f _deps/googletest-build/googletest/CMakeFiles/gtest_main.dir/build.make _deps/googletest-build/googletest/CMakeFiles/gtest_main.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/CMakeFiles --progress-num=10,11 "Built target gtest_main"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/CMakeFiles --progress-num=14,15 "Built target gtest_main"
 .PHONY : _deps/googletest-build/googletest/CMakeFiles/gtest_main.dir/all
 
 # Build rule for subdir invocation for target.
@@ -277,32 +277,32 @@ _deps/googletest-build/googletest/CMakeFiles/gtest_main.dir/clean:
 .PHONY : _deps/googletest-build/googletest/CMakeFiles/gtest_main.dir/clean
 
 #=============================================================================
-# Target rules for target tests/CMakeFiles/symmetric_tests.dir
+# Target rules for target tests/CMakeFiles/crypto_tests.dir
 
 # All Build rule for target.
-tests/CMakeFiles/symmetric_tests.dir/all: CMakeFiles/crypto.dir/all
-tests/CMakeFiles/symmetric_tests.dir/all: _deps/googletest-build/googletest/CMakeFiles/gtest.dir/all
-tests/CMakeFiles/symmetric_tests.dir/all: _deps/googletest-build/googletest/CMakeFiles/gtest_main.dir/all
-	$(MAKE) $(MAKESILENT) -f tests/CMakeFiles/symmetric_tests.dir/build.make tests/CMakeFiles/symmetric_tests.dir/depend
-	$(MAKE) $(MAKESILENT) -f tests/CMakeFiles/symmetric_tests.dir/build.make tests/CMakeFiles/symmetric_tests.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/CMakeFiles --progress-num=12,13 "Built target symmetric_tests"
-.PHONY : tests/CMakeFiles/symmetric_tests.dir/all
+tests/CMakeFiles/crypto_tests.dir/all: _deps/googletest-build/googletest/CMakeFiles/gtest.dir/all
+tests/CMakeFiles/crypto_tests.dir/all: _deps/googletest-build/googletest/CMakeFiles/gtest_main.dir/all
+tests/CMakeFiles/crypto_tests.dir/all: CMakeFiles/crypto.dir/all
+	$(MAKE) $(MAKESILENT) -f tests/CMakeFiles/crypto_tests.dir/build.make tests/CMakeFiles/crypto_tests.dir/depend
+	$(MAKE) $(MAKESILENT) -f tests/CMakeFiles/crypto_tests.dir/build.make tests/CMakeFiles/crypto_tests.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/CMakeFiles --progress-num=5,6,7 "Built target crypto_tests"
+.PHONY : tests/CMakeFiles/crypto_tests.dir/all
 
 # Build rule for subdir invocation for target.
-tests/CMakeFiles/symmetric_tests.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/CMakeFiles 9
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/CMakeFiles/symmetric_tests.dir/all
+tests/CMakeFiles/crypto_tests.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/CMakeFiles 11
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/CMakeFiles/crypto_tests.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/CMakeFiles 0
-.PHONY : tests/CMakeFiles/symmetric_tests.dir/rule
+.PHONY : tests/CMakeFiles/crypto_tests.dir/rule
 
 # Convenience name for target.
-symmetric_tests: tests/CMakeFiles/symmetric_tests.dir/rule
-.PHONY : symmetric_tests
+crypto_tests: tests/CMakeFiles/crypto_tests.dir/rule
+.PHONY : crypto_tests
 
 # clean rule for target.
-tests/CMakeFiles/symmetric_tests.dir/clean:
-	$(MAKE) $(MAKESILENT) -f tests/CMakeFiles/symmetric_tests.dir/build.make tests/CMakeFiles/symmetric_tests.dir/clean
-.PHONY : tests/CMakeFiles/symmetric_tests.dir/clean
+tests/CMakeFiles/crypto_tests.dir/clean:
+	$(MAKE) $(MAKESILENT) -f tests/CMakeFiles/crypto_tests.dir/build.make tests/CMakeFiles/crypto_tests.dir/clean
+.PHONY : tests/CMakeFiles/crypto_tests.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

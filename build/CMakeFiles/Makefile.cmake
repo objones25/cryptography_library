@@ -174,5 +174,5 @@ set(CMAKE_DEPEND_INFO_FILES
   "_deps/googletest-build/googlemock/CMakeFiles/gmock_main.dir/DependInfo.cmake"
   "_deps/googletest-build/googletest/CMakeFiles/gtest.dir/DependInfo.cmake"
   "_deps/googletest-build/googletest/CMakeFiles/gtest_main.dir/DependInfo.cmake"
-  "tests/CMakeFiles/symmetric_tests.dir/DependInfo.cmake"
+  "tests/CMakeFiles/crypto_tests.dir/DependInfo.cmake"
   )

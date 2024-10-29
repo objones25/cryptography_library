@@ -97,19 +97,35 @@ CMakeFiles/crypto.dir/src/crypto_logger.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/crypto.dir/src/crypto_logger.cpp.s"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/theelusivegerbilfish/CPP_projects/cryptography_library/src/crypto_logger.cpp -o CMakeFiles/crypto.dir/src/crypto_logger.cpp.s
 
+CMakeFiles/crypto.dir/src/hash.cpp.o: CMakeFiles/crypto.dir/flags.make
+CMakeFiles/crypto.dir/src/hash.cpp.o: /Users/theelusivegerbilfish/CPP_projects/cryptography_library/src/hash.cpp
+CMakeFiles/crypto.dir/src/hash.cpp.o: CMakeFiles/crypto.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/crypto.dir/src/hash.cpp.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/crypto.dir/src/hash.cpp.o -MF CMakeFiles/crypto.dir/src/hash.cpp.o.d -o CMakeFiles/crypto.dir/src/hash.cpp.o -c /Users/theelusivegerbilfish/CPP_projects/cryptography_library/src/hash.cpp
+
+CMakeFiles/crypto.dir/src/hash.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/crypto.dir/src/hash.cpp.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/theelusivegerbilfish/CPP_projects/cryptography_library/src/hash.cpp > CMakeFiles/crypto.dir/src/hash.cpp.i
+
+CMakeFiles/crypto.dir/src/hash.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/crypto.dir/src/hash.cpp.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/theelusivegerbilfish/CPP_projects/cryptography_library/src/hash.cpp -o CMakeFiles/crypto.dir/src/hash.cpp.s
+
 # Object files for target crypto
 crypto_OBJECTS = \
 "CMakeFiles/crypto.dir/src/symmetric.cpp.o" \
-"CMakeFiles/crypto.dir/src/crypto_logger.cpp.o"
+"CMakeFiles/crypto.dir/src/crypto_logger.cpp.o" \
+"CMakeFiles/crypto.dir/src/hash.cpp.o"
 
 # External object files for target crypto
 crypto_EXTERNAL_OBJECTS =
 
 libcrypto.a: CMakeFiles/crypto.dir/src/symmetric.cpp.o
 libcrypto.a: CMakeFiles/crypto.dir/src/crypto_logger.cpp.o
+libcrypto.a: CMakeFiles/crypto.dir/src/hash.cpp.o
 libcrypto.a: CMakeFiles/crypto.dir/build.make
 libcrypto.a: CMakeFiles/crypto.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX static library libcrypto.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX static library libcrypto.a"
 	$(CMAKE_COMMAND) -P CMakeFiles/crypto.dir/cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/crypto.dir/link.txt --verbose=$(VERBOSE)
 
