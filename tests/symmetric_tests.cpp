@@ -457,6 +457,63 @@ TEST_F(SymmetricTestBase, MultipleBlockSizes)
     }
 }
 
+TEST_F(SymmetricTestBase, PaddingVerification)
+{
+    // Test case 1: Empty vector
+    std::vector<uint8_t> empty;
+    std::vector<uint8_t> key = generateRandomData(16);
+    std::vector<uint8_t> iv = generateRandomData(16);
+
+    auto encrypted1 = aes128.aesEncryptCBC(empty, key, iv);
+    EXPECT_EQ(encrypted1.size(), 16); // One full block for padding only
+    auto decrypted1 = aes128.aesDecryptCBC(encrypted1, key, iv);
+    EXPECT_EQ(decrypted1, empty);
+
+    // Test case 2: One byte
+    std::vector<uint8_t> oneByte = {0x42};
+    auto encrypted2 = aes128.aesEncryptCBC(oneByte, key, iv);
+    EXPECT_EQ(encrypted2.size(), 16); // One full block
+    auto decrypted2 = aes128.aesDecryptCBC(encrypted2, key, iv);
+    EXPECT_EQ(decrypted2, oneByte);
+
+    // Test case 3: Full block
+    std::vector<uint8_t> fullBlock(16, 0x42);
+    auto encrypted3 = aes128.aesEncryptCBC(fullBlock, key, iv);
+    EXPECT_EQ(encrypted3.size(), 32); // Two full blocks (original + padding)
+    auto decrypted3 = aes128.aesDecryptCBC(encrypted3, key, iv);
+    EXPECT_EQ(decrypted3, fullBlock);
+
+    // Test case 4: Block + 1 byte to verify padding works across blocks
+    std::vector<uint8_t> blockPlusOne(17, 0x42);
+    auto encrypted4 = aes128.aesEncryptCBC(blockPlusOne, key, iv);
+    EXPECT_EQ(encrypted4.size(), 32); // Should round up to two full blocks
+    auto decrypted4 = aes128.aesDecryptCBC(encrypted4, key, iv);
+    EXPECT_EQ(decrypted4, blockPlusOne);
+}
+
+TEST_F(SymmetricTestBase, PaddingAlignment)
+{
+    std::vector<uint8_t> key = generateRandomData(16);
+    std::vector<uint8_t> iv = generateRandomData(16);
+
+    // Test all possible unaligned sizes up to 2 blocks
+    for (size_t size = 0; size <= 32; size++)
+    {
+        std::vector<uint8_t> data(size, 0x42);
+        auto encrypted = aes128.aesEncryptCBC(data, key, iv);
+
+        // Verify encrypted size is properly aligned
+        EXPECT_EQ(encrypted.size() % 16, 0)
+            << "Size " << size << " produced unaligned output";
+        EXPECT_EQ(encrypted.size(), ((size + 15) / 16) * 16)
+            << "Size " << size << " produced incorrect padding";
+
+        auto decrypted = aes128.aesDecryptCBC(encrypted, key, iv);
+        EXPECT_EQ(decrypted, data)
+            << "Size " << size << " failed to roundtrip";
+    }
+}
+
 // Performance tests
 class SymmetricPerformanceTests : public SymmetricTestBase
 {
@@ -468,7 +525,8 @@ protected:
     }
 };
 
-TEST_F(SymmetricPerformanceTests, LargeDataPerformance) {
+TEST_F(SymmetricPerformanceTests, LargeDataPerformance)
+{
     const std::vector<size_t> testSizes = {
         64 * 1024,       // 64 KB
         1024 * 1024,     // 1 MB
@@ -476,40 +534,42 @@ TEST_F(SymmetricPerformanceTests, LargeDataPerformance) {
     };
 
     // Define appropriate key sizes for each AES variant
-    struct AESImplementation {
+    struct AESImplementation
+    {
         std::string name;
-        crypto::ModernSymmetricImpl* impl;
+        crypto::ModernSymmetricImpl *impl;
         size_t keySize;
     };
 
     std::vector<AESImplementation> implementations = {
         {"AES-128", &aes128, 16},
         {"AES-192", &aes192, 24},
-        {"AES-256", &aes256, 32}
-    };
+        {"AES-256", &aes256, 32}};
 
     std::vector<uint8_t> iv = generateRandomData(16);
 
-    for (size_t size : testSizes) {
+    for (size_t size : testSizes)
+    {
         std::vector<uint8_t> data = generateRandomData(size);
 
-        for (const auto& impl : implementations) {
+        for (const auto &impl : implementations)
+        {
             // Generate key of appropriate length for each implementation
             std::vector<uint8_t> key = generateRandomData(impl.keySize);
-            
+
             auto metrics = measurePerformance(data, key, iv, *impl.impl);
 
             std::cout << impl.name << ":\n"
                       << metrics.toString() << "\n\n";
 
             // More realistic performance expectations
-            EXPECT_LT(metrics.encryptionTime, 10.0) 
+            EXPECT_LT(metrics.encryptionTime, 10.0)
                 << impl.name << " encryption took too long";
-            EXPECT_LT(metrics.decryptionTime, 10.0) 
+            EXPECT_LT(metrics.decryptionTime, 10.0)
                 << impl.name << " decryption took too long";
-            EXPECT_GT(metrics.throughputMBps, 1.0) 
+            EXPECT_GT(metrics.throughputMBps, 1.0)
                 << impl.name << " throughput too low";
-            EXPECT_LT(metrics.memoryUsage, size * 4) 
+            EXPECT_LT(metrics.memoryUsage, size * 4)
                 << impl.name << " memory usage too high";
         }
     }
@@ -880,6 +940,160 @@ TEST_F(SymmetricSafetyTests, SecureErasure)
     {
         EXPECT_EQ(byte, 0);
     }
+}
+
+#include <gtest/gtest.h>
+#include "symmetric.hpp"
+#include <vector>
+
+class PKCS7PaddingTest : public ::testing::Test
+{
+protected:
+    void SetUp() override
+    {
+        crypto::CryptoLogger::set_debug_mode(true);
+    }
+
+    crypto::ModernSymmetricImpl aes{crypto::AESKeyLength::AES_128};
+
+    // Helper to check if padding is valid PKCS7
+    bool isValidPKCS7Padding(const std::vector<uint8_t> &data)
+    {
+        if (data.empty())
+            return false;
+
+        uint8_t paddingLen = data.back();
+        if (paddingLen == 0 || paddingLen > 16 || paddingLen > data.size())
+        {
+            crypto::CryptoLogger::debug("Invalid padding length: " +
+                                        std::to_string(paddingLen));
+            return false;
+        }
+
+        // Check all padding bytes are correct
+        for (size_t i = data.size() - paddingLen; i < data.size(); i++)
+        {
+            if (data[i] != paddingLen)
+            {
+                crypto::CryptoLogger::debug("Invalid padding byte at position " +
+                                            std::to_string(i) + ": " + std::to_string(data[i]));
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // Helper to create test vectors with known padding
+    std::vector<uint8_t> createTestVector(size_t dataSize)
+    {
+        std::vector<uint8_t> data(dataSize);
+        // Fill with incrementing values
+        for (size_t i = 0; i < dataSize; i++)
+        {
+            data[i] = static_cast<uint8_t>(i & 0xFF);
+        }
+        return data;
+    }
+};
+
+TEST_F(PKCS7PaddingTest, SingleBlockWithPadding)
+{
+    // Test with 10 bytes of data (requires 6 bytes padding)
+    std::vector<uint8_t> input = createTestVector(10);
+    std::vector<uint8_t> key(16, 0x42); // Fixed key for reproducibility
+    std::vector<uint8_t> iv(16, 0x24);  // Fixed IV for reproducibility
+
+    crypto::CryptoLogger::debug("Original input: " + hexDump(input));
+
+    // Encrypt (should add 6 bytes of padding)
+    auto encrypted = aes.aesEncryptCBC(input, key, iv);
+    crypto::CryptoLogger::debug("Encrypted data: " + hexDump(encrypted));
+    ASSERT_EQ(encrypted.size(), 16); // Should be one full block
+
+    // Decrypt
+    auto decrypted = aes.aesDecryptCBC(encrypted, key, iv);
+    crypto::CryptoLogger::debug("Decrypted data: " + hexDump(decrypted));
+
+    // Verify original data matches
+    ASSERT_EQ(decrypted.size(), input.size());
+    EXPECT_EQ(decrypted, input);
+}
+
+TEST_F(PKCS7PaddingTest, FullBlockPadding)
+{
+    // Test with exactly 16 bytes (requires full block of padding)
+    std::vector<uint8_t> input = createTestVector(16);
+    std::vector<uint8_t> key(16, 0x42);
+    std::vector<uint8_t> iv(16, 0x24);
+
+    crypto::CryptoLogger::debug("Original input: " + hexDump(input));
+
+    // Encrypt (should add full block of padding)
+    auto encrypted = aes.aesEncryptCBC(input, key, iv);
+    crypto::CryptoLogger::debug("Encrypted data: " + hexDump(encrypted));
+    ASSERT_EQ(encrypted.size(), 32); // Should be two full blocks
+
+    // Decrypt
+    auto decrypted = aes.aesDecryptCBC(encrypted, key, iv);
+    crypto::CryptoLogger::debug("Decrypted data: " + hexDump(decrypted));
+
+    // Verify original data matches
+    ASSERT_EQ(decrypted.size(), input.size());
+    EXPECT_EQ(decrypted, input);
+}
+
+TEST_F(PKCS7PaddingTest, MultipleBlocksWithPadding)
+{
+    // Test with 30 bytes (spans 2 blocks, requires 2 bytes padding)
+    std::vector<uint8_t> input = createTestVector(30);
+    std::vector<uint8_t> key(16, 0x42);
+    std::vector<uint8_t> iv(16, 0x24);
+
+    crypto::CryptoLogger::debug("Original input: " + hexDump(input));
+
+    // Encrypt
+    auto encrypted = aes.aesEncryptCBC(input, key, iv);
+    crypto::CryptoLogger::debug("Encrypted data: " + hexDump(encrypted));
+    ASSERT_EQ(encrypted.size(), 32); // Should round up to 2 full blocks
+
+    // Verify padding before decryption
+    auto paddedSize = ((input.size() + 15) / 16) * 16;
+    ASSERT_EQ(encrypted.size(), paddedSize);
+
+    // Decrypt
+    auto decrypted = aes.aesDecryptCBC(encrypted, key, iv);
+    crypto::CryptoLogger::debug("Decrypted data: " + hexDump(decrypted));
+
+    // Verify original data matches
+    ASSERT_EQ(decrypted.size(), input.size());
+    EXPECT_EQ(decrypted, input);
+}
+
+TEST_F(PKCS7PaddingTest, CorruptPadding)
+{
+    // Create initial valid data
+    std::vector<uint8_t> input = createTestVector(10);
+    std::vector<uint8_t> key(16, 0x42);
+    std::vector<uint8_t> iv(16, 0x24);
+
+    auto encrypted = aes.aesEncryptCBC(input, key, iv);
+    crypto::CryptoLogger::debug("Original encrypted data: " + hexDump(encrypted));
+
+    // Corrupt last byte (padding length)
+    auto corrupted = encrypted;
+    corrupted.back() ^= 0x01; // Flip one bit
+    crypto::CryptoLogger::debug("Corrupted padding length: " + hexDump(corrupted));
+
+    // Should throw on invalid padding
+    EXPECT_THROW(aes.aesDecryptCBC(corrupted, key, iv), crypto::AESException);
+
+    // Corrupt padding byte
+    corrupted = encrypted;
+    corrupted[corrupted.size() - 2] ^= 0x01; // Corrupt second-to-last byte
+    crypto::CryptoLogger::debug("Corrupted padding byte: " + hexDump(corrupted));
+
+    // Should throw on invalid padding
+    EXPECT_THROW(aes.aesDecryptCBC(corrupted, key, iv), crypto::AESException);
 }
 
 int main(int argc, char **argv)

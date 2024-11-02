@@ -1,5 +1,6 @@
+# Main CMakeLists.txt
 cmake_minimum_required(VERSION 3.12)
-project(cryptography_library VERSION 1.0)
+project(cryptography_library VERSION 1.0 LANGUAGES CXX)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -7,6 +8,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Find required packages
 find_package(Threads REQUIRED)
+
+# Check for x86_64 architecture and add AES-NI flags
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "(x86_64)|(AMD64)|(^i.86$)")
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        add_compile_options(-maes -msse4.1)
+    elseif(MSVC)
+        add_compile_definitions(_M_X64)
+    endif()
+endif()
 
 # Compiler flags
 if(MSVC)
@@ -25,13 +35,23 @@ add_library(crypto
 # Include directories
 target_include_directories(crypto
     PUBLIC
-        ${PROJECT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
     PRIVATE
-        ${PROJECT_SOURCE_DIR}/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 # Link against threads
 target_link_libraries(crypto PRIVATE Threads::Threads)
+
+# Installation rules
+install(TARGETS crypto
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    RUNTIME DESTINATION bin
+)
+
+install(DIRECTORY include/
+    DESTINATION include)
 
 # Optionally add tests
 option(BUILD_TESTS "Build tests" OFF)
@@ -49,18 +69,14 @@ if(BUILD_TESTS)
     
     # For Windows: Prevent overriding the parent project's compiler/linker settings
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    
+    # Only build gtest, not gmock
+    set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
+    set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
+    
+    # Fetch and make Google Test available
     FetchContent_MakeAvailable(googletest)
     
+    # Add the tests subdirectory
     add_subdirectory(tests)
 endif()
-
-# Installation rules
-install(TARGETS crypto
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    RUNTIME DESTINATION bin
-)
-
-install(DIRECTORY include/
-    DESTINATION include
-)

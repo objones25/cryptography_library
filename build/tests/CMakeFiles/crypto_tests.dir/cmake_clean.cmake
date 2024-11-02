@@ -1,4 +1,6 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/crypto_tests.dir/aes_ni_tests.cpp.o"
+  "CMakeFiles/crypto_tests.dir/aes_ni_tests.cpp.o.d"
   "CMakeFiles/crypto_tests.dir/hash_tests.cpp.o"
   "CMakeFiles/crypto_tests.dir/hash_tests.cpp.o.d"
   "CMakeFiles/crypto_tests.dir/symmetric_tests.cpp.o"

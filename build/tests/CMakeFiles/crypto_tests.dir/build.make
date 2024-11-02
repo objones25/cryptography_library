@@ -97,23 +97,38 @@ tests/CMakeFiles/crypto_tests.dir/hash_tests.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/crypto_tests.dir/hash_tests.cpp.s"
 	cd /Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/tests && /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/theelusivegerbilfish/CPP_projects/cryptography_library/tests/hash_tests.cpp -o CMakeFiles/crypto_tests.dir/hash_tests.cpp.s
 
+tests/CMakeFiles/crypto_tests.dir/aes_ni_tests.cpp.o: tests/CMakeFiles/crypto_tests.dir/flags.make
+tests/CMakeFiles/crypto_tests.dir/aes_ni_tests.cpp.o: /Users/theelusivegerbilfish/CPP_projects/cryptography_library/tests/aes_ni_tests.cpp
+tests/CMakeFiles/crypto_tests.dir/aes_ni_tests.cpp.o: tests/CMakeFiles/crypto_tests.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object tests/CMakeFiles/crypto_tests.dir/aes_ni_tests.cpp.o"
+	cd /Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/tests && /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT tests/CMakeFiles/crypto_tests.dir/aes_ni_tests.cpp.o -MF CMakeFiles/crypto_tests.dir/aes_ni_tests.cpp.o.d -o CMakeFiles/crypto_tests.dir/aes_ni_tests.cpp.o -c /Users/theelusivegerbilfish/CPP_projects/cryptography_library/tests/aes_ni_tests.cpp
+
+tests/CMakeFiles/crypto_tests.dir/aes_ni_tests.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/crypto_tests.dir/aes_ni_tests.cpp.i"
+	cd /Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/tests && /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/theelusivegerbilfish/CPP_projects/cryptography_library/tests/aes_ni_tests.cpp > CMakeFiles/crypto_tests.dir/aes_ni_tests.cpp.i
+
+tests/CMakeFiles/crypto_tests.dir/aes_ni_tests.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/crypto_tests.dir/aes_ni_tests.cpp.s"
+	cd /Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/tests && /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/theelusivegerbilfish/CPP_projects/cryptography_library/tests/aes_ni_tests.cpp -o CMakeFiles/crypto_tests.dir/aes_ni_tests.cpp.s
+
 # Object files for target crypto_tests
 crypto_tests_OBJECTS = \
 "CMakeFiles/crypto_tests.dir/symmetric_tests.cpp.o" \
-"CMakeFiles/crypto_tests.dir/hash_tests.cpp.o"
+"CMakeFiles/crypto_tests.dir/hash_tests.cpp.o" \
+"CMakeFiles/crypto_tests.dir/aes_ni_tests.cpp.o"
 
 # External object files for target crypto_tests
 crypto_tests_EXTERNAL_OBJECTS =
 
 tests/crypto_tests: tests/CMakeFiles/crypto_tests.dir/symmetric_tests.cpp.o
 tests/crypto_tests: tests/CMakeFiles/crypto_tests.dir/hash_tests.cpp.o
+tests/crypto_tests: tests/CMakeFiles/crypto_tests.dir/aes_ni_tests.cpp.o
 tests/crypto_tests: tests/CMakeFiles/crypto_tests.dir/build.make
 tests/crypto_tests: libcrypto.a
-tests/crypto_tests: lib/libgtest.a
 tests/crypto_tests: lib/libgtest_main.a
 tests/crypto_tests: lib/libgtest.a
 tests/crypto_tests: tests/CMakeFiles/crypto_tests.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable crypto_tests"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable crypto_tests"
 	cd /Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/tests && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/crypto_tests.dir/link.txt --verbose=$(VERBOSE)
 	cd /Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/tests && /usr/local/Cellar/cmake/3.30.3/bin/cmake -D TEST_TARGET=crypto_tests -D TEST_EXECUTABLE=/Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/tests/crypto_tests -D TEST_EXECUTOR= -D TEST_WORKING_DIR=/Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/tests -D TEST_EXTRA_ARGS= -D TEST_PROPERTIES= -D TEST_PREFIX= -D TEST_SUFFIX= -D TEST_FILTER= -D NO_PRETTY_TYPES=FALSE -D NO_PRETTY_VALUES=FALSE -D TEST_LIST=crypto_tests_TESTS -D CTEST_FILE=/Users/theelusivegerbilfish/CPP_projects/cryptography_library/build/tests/crypto_tests[1]_tests.cmake -D TEST_DISCOVERY_TIMEOUT=5 -D TEST_XML_OUTPUT_DIR= -P /usr/local/Cellar/cmake/3.30.3/share/cmake/Modules/GoogleTestAddTests.cmake
 

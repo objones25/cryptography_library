@@ -185,6 +185,30 @@ crypto_tests/fast:
 	cd /Users/theelusivegerbilfish/CPP_projects/cryptography_library/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/crypto_tests.dir/build.make tests/CMakeFiles/crypto_tests.dir/build
 .PHONY : crypto_tests/fast
 
+aes_ni_tests.o: aes_ni_tests.cpp.o
+.PHONY : aes_ni_tests.o
+
+# target to build an object file
+aes_ni_tests.cpp.o:
+	cd /Users/theelusivegerbilfish/CPP_projects/cryptography_library/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/crypto_tests.dir/build.make tests/CMakeFiles/crypto_tests.dir/aes_ni_tests.cpp.o
+.PHONY : aes_ni_tests.cpp.o
+
+aes_ni_tests.i: aes_ni_tests.cpp.i
+.PHONY : aes_ni_tests.i
+
+# target to preprocess a source file
+aes_ni_tests.cpp.i:
+	cd /Users/theelusivegerbilfish/CPP_projects/cryptography_library/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/crypto_tests.dir/build.make tests/CMakeFiles/crypto_tests.dir/aes_ni_tests.cpp.i
+.PHONY : aes_ni_tests.cpp.i
+
+aes_ni_tests.s: aes_ni_tests.cpp.s
+.PHONY : aes_ni_tests.s
+
+# target to generate assembly for a file
+aes_ni_tests.cpp.s:
+	cd /Users/theelusivegerbilfish/CPP_projects/cryptography_library/build && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/crypto_tests.dir/build.make tests/CMakeFiles/crypto_tests.dir/aes_ni_tests.cpp.s
+.PHONY : aes_ni_tests.cpp.s
+
 hash_tests.o: hash_tests.cpp.o
 .PHONY : hash_tests.o
 
@@ -247,6 +271,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... test"
 	@echo "... crypto_tests"
+	@echo "... aes_ni_tests.o"
+	@echo "... aes_ni_tests.i"
+	@echo "... aes_ni_tests.s"
 	@echo "... hash_tests.o"
 	@echo "... hash_tests.i"
 	@echo "... hash_tests.s"
